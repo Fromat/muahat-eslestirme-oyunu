@@ -209,6 +209,11 @@
             }
 
             resetBtn.style.display = 'block';
+
+            const banner = document.createElement('div');
+            banner.style.cssText = 'background:#7c3aed;color:white;text-align:center;padding:10px;border-radius:5px;margin-top:10px;';
+            banner.innerHTML = 'Kanalımıza katılın: <a href="https://t.me/dhbt_dkab_ihl" target="_blank" style="color:#fff;font-weight:bold;">https://t.me/dhbt_dkab_ihl</a>';
+            document.body.appendChild(banner);
         }
 
         resetBtn.addEventListener('click', initializeGame);
