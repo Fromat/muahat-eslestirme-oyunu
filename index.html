@@ -87,7 +87,6 @@
                 background: #e0e0e0;
             }
 
-        /* Mobilde de kolonlar yan yana */
         @media (max-width: 600px) {
             .game-container {
                 flex-wrap: nowrap;
@@ -111,9 +110,19 @@
     <script>const muhacirler = ['Hz. Ebubekir', 'Hz. Ömer', 'Hz. Osman', 'Ubeyde b. Cerrah', 'Mus\'ab b. Umeyr'];
         const ensarlar = ['Harice b. Zeyd', 'Utban b. Malik', 'Evs b. Sabit', 'Sa\'d b. Mu\'az', 'Eyyub el-Ensarî'];
 
+        // Doğru eşleşmeleri obje olarak tanımla
+        const matches = {
+            'Hz. Ebubekir': 'Harice b. Zeyd',
+            'Hz. Ömer': 'Utban b. Malik',
+            'Hz. Osman': 'Evs b. Sabit',
+            'Ubeyde b. Cerrah': "Sa'd b. Mu'az",
+            "Mus'ab b. Umeyr": 'Eyyub el-Ensarî'
+        };
+
         let selectedCards = [];
         let matchedCount = 0;
         let isProcessing = false;
+        let banner = null;
 
         const leftContainer = document.getElementById('left-cards');
         const rightContainer = document.getElementById('right-cards');
@@ -136,9 +145,19 @@
             return card;
         }
 
+        function showBanner() {
+            if (banner) banner.remove();
+            banner = document.createElement('div');
+            banner.style.cssText = 'background:#7c3aed;color:white;text-align:center;padding:10px;border-radius:5px;margin-top:10px;';
+            banner.innerHTML = 'Kanalımıza katılın: <a href="https://t.me/dhbt_dkab_ihl" target="_blank" style="color:#fff;font-weight:bold;">https://t.me/dhbt_dkab_ihl</a>';
+            document.body.appendChild(banner);
+        }
+
         function initializeGame() {
             leftContainer.innerHTML = '';
             rightContainer.innerHTML = '';
+
+            if (banner) { banner.remove(); banner = null; }
 
             const leftCards = muhacirler.map(name => createCard(name, 'left'));
             const rightCards = ensarlar.map(name => createCard(name, 'right'));
@@ -165,30 +184,32 @@
 
             if (selectedCards.length === 2) {
                 const [c1, c2] = selectedCards;
-                const c1Index = muhacirler.indexOf(c1.dataset.content);
-                const c2Index = ensarlar.indexOf(c2.dataset.content);
+                if (c1.dataset.side !== c2.dataset.side) {
+                    const leftCard = c1.dataset.side === 'left' ? c1 : c2;
+                    const rightCard = c1.dataset.side === 'right' ? c1 : c2;
 
-                if (c1.dataset.side !== c2.dataset.side && c1Index === c2Index) {
-                    c1.classList.add('matched');
-                    c2.classList.add('matched');
-                    matchedCount++;
-                    selectedCards = [];
-
-                    if (matchedCount === muhacirler.length) {
-                        setTimeout(() => showFinalLayout(), 500);
-                    }
-                } else {
-                    isProcessing = true;
-                    c1.classList.add('incorrect');
-                    c2.classList.add('incorrect');
-                    setTimeout(() => {
-                        c1.classList.remove('incorrect');
-                        c2.classList.remove('incorrect');
-                        c1.classList.add('hidden');
-                        c2.classList.add('hidden');
+                    if (matches[leftCard.dataset.content] === rightCard.dataset.content) {
+                        leftCard.classList.add('matched');
+                        rightCard.classList.add('matched');
+                        matchedCount++;
                         selectedCards = [];
-                        isProcessing = false;
-                    }, 1000);
+
+                        if (matchedCount === muhacirler.length) {
+                            setTimeout(() => showFinalLayout(), 500);
+                        }
+                    } else {
+                        isProcessing = true;
+                        leftCard.classList.add('incorrect');
+                        rightCard.classList.add('incorrect');
+                        setTimeout(() => {
+                            leftCard.classList.remove('incorrect');
+                            rightCard.classList.remove('incorrect');
+                            leftCard.classList.add('hidden');
+                            rightCard.classList.add('hidden');
+                            selectedCards = [];
+                            isProcessing = false;
+                        }, 1000);
+                    }
                 }
             }
         }
@@ -208,12 +229,8 @@
                 rightContainer.appendChild(rightCard);
             }
 
+            showBanner();
             resetBtn.style.display = 'block';
-
-            const banner = document.createElement('div');
-            banner.style.cssText = 'background:#7c3aed;color:white;text-align:center;padding:10px;border-radius:5px;margin-top:10px;';
-            banner.innerHTML = 'Kanalımıza katılın: <a href="https://t.me/dhbt_dkab_ihl" target="_blank" style="color:#fff;font-weight:bold;">https://t.me/dhbt_dkab_ihl</a>';
-            document.body.appendChild(banner);
         }
 
         resetBtn.addEventListener('click', initializeGame);
