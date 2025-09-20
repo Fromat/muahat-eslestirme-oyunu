@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Muâhat Kardeşleri Eşleştirme Oyunu</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        .game-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
+            gap: 10px;
+            width: 45%;
+            min-width: 200px;
+        }
+
+        @media (min-width: 500px) {
+            .cards {
+                grid-template-columns: repeat(1, 1fr);
+            }
+        }
+
+        .card {
+            padding: 20px;
+            background: #fff;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+            .card.matched {
+                background-color: #4caf50;
+                color: white;
+                border-color: #388e3c;
+            }
+
+            .card.incorrect {
+                background-color: #f44336;
+                color: white;
+                border-color: #d32f2f;
+            }
+
+            .card.hidden {
+                background-color: #e0e0e0;
+            }
+
+            .card.final {
+                background-color: white;
+                color: black;
+                border-color: black;
+            }
+
+        .reset-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: white;
+            color: black;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+            .reset-btn:hover {
+                background: #e0e0e0;
+            }
+    </style>
+</head>
+<body>
+
+    <h2>Muâhat Kardeşleri Eşleştirme Oyunu</h2>
+    <div class="game-container">
+        <div class="cards" id="left-cards"></div>
+        <div class="cards" id="right-cards"></div>
+    </div>
+    <button class="reset-btn" id="reset-btn" style="display: none;">Tekrar Oyna</button>
+
+    <script>const muhacirler = ['Hz. Ebubekir', 'Hz. Ömer', 'Hz. Osman', 'Ubeyde b. Cerrah', 'Mus\'ab b. Umeyr'];
+        const ensarlar = ['Harice b. Zeyd', 'Utban b. Malik', 'Evs b. Sabit', 'Sa\'d b. Mu\'az', 'Eyyub el-Ensarî'];
+
+        let selectedCards = [];
+        let matchedCount = 0;
+        let isProcessing = false;
+
+        const leftContainer = document.getElementById('left-cards');
+        const rightContainer = document.getElementById('right-cards');
+        const resetBtn = document.getElementById('reset-btn');
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function createCard(content, side) {
+            const card = document.createElement('div');
+            card.classList.add('card', 'hidden');
+            card.textContent = content;
+            card.dataset.content = content;
+            card.dataset.side = side;
+            card.addEventListener('click', () => handleClick(card));
+            return card;
+        }
+
+        function initializeGame() {
+            leftContainer.innerHTML = '';
+            rightContainer.innerHTML = '';
+
+            const leftCards = muhacirler.map(name => createCard(name, 'left'));
+            const rightCards = ensarlar.map(name => createCard(name, 'right'));
+
+            shuffle(leftCards);
+            shuffle(rightCards);
+
+            leftCards.forEach(c => leftContainer.appendChild(c));
+            rightCards.forEach(c => rightContainer.appendChild(c));
+
+            selectedCards = [];
+            matchedCount = 0;
+            isProcessing = false;
+            resetBtn.style.display = 'none';
+        }
+
+        function handleClick(card) {
+            if (isProcessing) return;
+            if (card.classList.contains('matched') || selectedCards.includes(card)) return;
+            if (selectedCards.length === 1 && selectedCards[0].dataset.side === card.dataset.side) return;
+
+            card.classList.remove('hidden');
+            selectedCards.push(card);
+
+            if (selectedCards.length === 2) {
+                const [c1, c2] = selectedCards;
+                const c1Index = muhacirler.indexOf(c1.dataset.content);
+                const c2Index = ensarlar.indexOf(c2.dataset.content);
+
+                if (c1.dataset.side !== c2.dataset.side && c1Index === c2Index) {
+                    c1.classList.add('matched');
+                    c2.classList.add('matched');
+                    matchedCount++;
+                    selectedCards = [];
+
+                    if (matchedCount === muhacirler.length) {
+                        setTimeout(() => showFinalLayout(), 500);
+                    }
+                } else {
+                    isProcessing = true;
+                    c1.classList.add('incorrect');
+                    c2.classList.add('incorrect');
+                    setTimeout(() => {
+                        c1.classList.remove('incorrect');
+                        c2.classList.remove('incorrect');
+                        c1.classList.add('hidden');
+                        c2.classList.add('hidden');
+                        selectedCards = [];
+                        isProcessing = false;
+                    }, 1000);
+                }
+            }
+        }
+
+        function showFinalLayout() {
+            leftContainer.innerHTML = '';
+            rightContainer.innerHTML = '';
+
+            for (let i = 0; i < muhacirler.length; i++) {
+                const leftCard = createCard(muhacirler[i], 'left');
+                const rightCard = createCard(ensarlar[i], 'right');
+                leftCard.classList.remove('hidden');
+                rightCard.classList.remove('hidden');
+                leftCard.classList.add('final');
+                rightCard.classList.add('final');
+                leftContainer.appendChild(leftCard);
+                rightContainer.appendChild(rightCard);
+            }
+
+            resetBtn.style.display = 'block';
+        }
+
+        resetBtn.addEventListener('click', initializeGame);
+        initializeGame();</script>
+
+</body>
+</html>
