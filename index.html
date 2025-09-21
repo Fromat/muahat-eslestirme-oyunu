@@ -3,30 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Muâhat Kardeşleri Eşleştirme Oyunu</title>
+    <title>Eşleştirme Oyunları</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             background: #f4f4f9;
+            margin: 0;
+            padding: 0;
             display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .screen {
+            display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            margin: 0;
-            min-height: 100vh;
+            width: 100%;
+            max-width: 900px;
+            padding: 20px;
+        }
+
+        .active {
+            display: flex;
         }
 
         h2 {
             margin-bottom: 20px;
         }
 
+        .menu button {
+            padding: 15px 25px;
+            margin: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background: #7c3aed;
+            color: white;
+        }
+
+            .menu button:hover {
+                background: #5b21b6;
+            }
+
+        .back-btn {
+            align-self: flex-start;
+            margin-bottom: 15px;
+            background: #fff;
+            color: #000;
+            border: 2px solid #000;
+            border-radius: 5px;
+            padding: 5px 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
         .game-container {
             display: flex;
-            flex-wrap: wrap;
             justify-content: center;
             gap: 20px;
             width: 100%;
-            max-width: 900px;
         }
 
         .cards {
@@ -50,23 +90,23 @@
         }
 
             .card.matched {
-                background-color: #4caf50;
+                background: #4caf50;
                 color: white;
                 border-color: #388e3c;
             }
 
             .card.incorrect {
-                background-color: #f44336;
+                background: #f44336;
                 color: white;
                 border-color: #d32f2f;
             }
 
             .card.hidden {
-                background-color: #e0e0e0;
+                background: #e0e0e0;
             }
 
             .card.final {
-                background-color: white;
+                background: white;
                 color: black;
                 border-color: black;
             }
@@ -82,51 +122,87 @@
             font-size: 16px;
             font-weight: bold;
         }
-
-            .reset-btn:hover {
-                background: #e0e0e0;
-            }
-
-        @media (max-width: 600px) {
-            .game-container {
-                flex-wrap: nowrap;
-            }
-
-            .cards {
-                width: 45%;
-            }
+        /* Banner styling - centered under resetBtn */
+        .game-banner {
+            background: gray;
+            color: #000000;
+            text-align: center;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 12px;
+            width: 90%;
+            max-width: 420px;
+            box-sizing: border-box;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
         }
+
     </style>
 </head>
 <body>
 
-    <h2>Muâhat Kardeşleri Eşleştirme Oyunu</h2>
-    <div class="game-container">
-        <div class="cards" id="left-cards"></div>
-        <div class="cards" id="right-cards"></div>
+    <!-- Menü Ekranı -->
+    <div id="menu" class="screen active menu">
+        <h2>İslam Tarihi Bilgi Kavram Etkinlikleri</h2>
+        <button onclick="startGame('muahat')">Muâhat Kardeşleri</button>
+        <!-- ileride başka oyunlar eklenebilir -->
+        <!-- <button onclick="startGame('seriyye')">İlk Dört Seriyye</button> -->
     </div>
-    <button class="reset-btn" id="reset-btn" style="display: none;">Tekrar Oyna</button>
 
-    <script>const muhacirler = ['Hz. Ebubekir', 'Hz. Ömer', 'Hz. Osman', 'Ubeyde b. Cerrah', 'Mus\'ab b. Umeyr'];
-        const ensarlar = ['Harice b. Zeyd', 'Utban b. Malik', 'Evs b. Sabit', 'Sa\'d b. Mu\'az', 'Eyyub el-Ensarî'];
+    <!-- Oyun Ekranı -->
+    <div id="game" class="screen">
+        <button class="back-btn" onclick="goMenu()">← Menüye Dön</button>
+        <h2 id="game-title"></h2>
+        <div class="game-container">
+            <div class="cards" id="left-cards"></div>
+            <div class="cards" id="right-cards"></div>
+        </div>
+        <button class="reset-btn" id="reset-btn" style="display: none;">Tekrar Oyna</button>
+    </div>
 
-        // Doğru eşleşmeleri obje olarak tanımla
-        const matches = {
-            'Hz. Ebubekir': 'Harice b. Zeyd',
-            'Hz. Ömer': 'Utban b. Malik',
-            'Hz. Osman': 'Evs b. Sabit',
-            'Ubeyde b. Cerrah': "Sa'd b. Mu'az",
-            "Mus'ab b. Umeyr": 'Eyyub el-Ensarî'
+    <script>// Tüm oyunlar burada tanımlanacak
+        const games = {
+            muahat: {
+                title: "Muâhat Kardeşleri Eşleştirme Oyunu",
+                left: ['Hz. Ebubekir', 'Hz. Ömer', 'Hz. Osman', 'Ubeyde b. Cerrah', "Mus'ab b. Umeyr"],
+                right: ['Harice b. Zeyd', 'Utban b. Malik', 'Evs b. Sabit', "Sa'd b. Mu'az", 'Eyyub el-Ensarî'],
+                matches: {
+                    'Hz. Ebubekir': 'Harice b. Zeyd',
+                    'Hz. Ömer': 'Utban b. Malik',
+                    'Hz. Osman': 'Evs b. Sabit',
+                    'Ubeyde b. Cerrah': "Sa'd b. Mu'az",
+                    "Mus'ab b. Umeyr": 'Eyyub el-Ensarî'
+                }
+            },
+            // ileride başka oyunlar buraya eklenecek
         };
 
+        let currentGame = null;
         let selectedCards = [];
         let matchedCount = 0;
         let isProcessing = false;
         let banner = null;
 
+        const menuScreen = document.getElementById('menu');
+        const gameScreen = document.getElementById('game');
+        const gameTitle = document.getElementById('game-title');
         const leftContainer = document.getElementById('left-cards');
         const rightContainer = document.getElementById('right-cards');
         const resetBtn = document.getElementById('reset-btn');
+
+        function goMenu() {
+            gameScreen.classList.remove('active');
+            menuScreen.classList.add('active');
+        }
+
+        function startGame(gameKey) {
+            currentGame = games[gameKey];
+            menuScreen.classList.remove('active');
+            gameScreen.classList.add('active');
+            gameTitle.textContent = currentGame.title;
+            initializeGame();
+        }
 
         function shuffle(array) {
             for (let i = array.length - 1; i > 0; i--) {
@@ -145,22 +221,16 @@
             return card;
         }
 
-        function showBanner() {
-            if (banner) banner.remove();
-            banner = document.createElement('div');
-            banner.style.cssText = 'background:#7c3aed;color:white;text-align:center;padding:10px;border-radius:5px;margin-top:10px;';
-            banner.innerHTML = 'Kanalımıza katılın: <a href="https://t.me/dhbt_dkab_ihl" target="_blank" style="color:#fff;font-weight:bold;">https://t.me/dhbt_dkab_ihl</a>';
-            document.body.appendChild(banner);
-        }
 
         function initializeGame() {
             leftContainer.innerHTML = '';
             rightContainer.innerHTML = '';
 
+
             if (banner) { banner.remove(); banner = null; }
 
-            const leftCards = muhacirler.map(name => createCard(name, 'left'));
-            const rightCards = ensarlar.map(name => createCard(name, 'right'));
+            const leftCards = currentGame.left.map(name => createCard(name, 'left'));
+            const rightCards = currentGame.right.map(name => createCard(name, 'right'));
 
             shuffle(leftCards);
             shuffle(rightCards);
@@ -188,13 +258,12 @@
                     const leftCard = c1.dataset.side === 'left' ? c1 : c2;
                     const rightCard = c1.dataset.side === 'right' ? c1 : c2;
 
-                    if (matches[leftCard.dataset.content] === rightCard.dataset.content) {
+                    if (currentGame.matches[leftCard.dataset.content] === rightCard.dataset.content) {
                         leftCard.classList.add('matched');
                         rightCard.classList.add('matched');
                         matchedCount++;
                         selectedCards = [];
-
-                        if (matchedCount === muhacirler.length) {
+                        if (matchedCount === currentGame.left.length) {
                             setTimeout(() => showFinalLayout(), 500);
                         }
                     } else {
@@ -214,13 +283,30 @@
             }
         }
 
+        function showBanner() {
+            // mevcut banner varsa kaldır
+            if (banner) {
+                try { banner.remove(); } catch (e) { /* ignore */ }
+                banner = null;
+            }
+
+            // yeni banner oluştur ve sınıf ver
+            banner = document.createElement('div');
+            banner.className = 'game-banner';
+            banner.innerHTML = 'Kanalımıza katılın: <a href="https://t.me/dhbt_dkab_ihl" target="_blank" style="color:#00000;font-weight:700;text-decoration:none;">@dhbt_dkab_ihl</a>';
+
+            // resetBtn'in hemen altına ekle (ortalanmış)
+
+            resetBtn.insertAdjacentElement('afterend', banner);
+        }
+
         function showFinalLayout() {
             leftContainer.innerHTML = '';
             rightContainer.innerHTML = '';
 
-            for (let i = 0; i < muhacirler.length; i++) {
-                const leftCard = createCard(muhacirler[i], 'left');
-                const rightCard = createCard(ensarlar[i], 'right');
+            for (let i = 0; i < currentGame.left.length; i++) {
+                const leftCard = createCard(currentGame.left[i], 'left');
+                const rightCard = createCard(currentGame.right[i], 'right');
                 leftCard.classList.remove('hidden');
                 rightCard.classList.remove('hidden');
                 leftCard.classList.add('final');
@@ -228,13 +314,12 @@
                 leftContainer.appendChild(leftCard);
                 rightContainer.appendChild(rightCard);
             }
-
-            showBanner();
             resetBtn.style.display = 'block';
+            showBanner();
+
         }
 
-        resetBtn.addEventListener('click', initializeGame);
-        initializeGame();</script>
+        resetBtn.addEventListener('click', initializeGame);</script>
 
 </body>
 </html>
