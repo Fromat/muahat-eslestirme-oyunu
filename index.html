@@ -8,61 +8,53 @@
         body {
             font-family: Arial, sans-serif;
             background: #f4f4f9;
-            margin: 0;
-            padding: 0;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .screen {
-            display: none;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            width: 100%;
-            max-width: 900px;
+            justify-content: flex-start;
+            margin: 0;
+            min-height: 100vh;
             padding: 20px;
         }
 
-        .active {
-            display: flex;
-        }
-
         h2 {
-            margin-bottom: 20px;
+            margin: 20px 0;
+            text-align: center;
         }
 
-        .menu button {
+        .menu-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 50px;
+        }
+
+        .menu-btn {
             padding: 15px 25px;
-            margin: 10px;
             font-size: 16px;
             font-weight: bold;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            background: #7c3aed;
+            background: #4f46e5;
             color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
         }
 
-            .menu button:hover {
-                background: #5b21b6;
+            .menu-btn:hover {
+                background: #4338ca;
             }
 
-        .back-btn {
-            align-self: flex-start;
-            margin-bottom: 15px;
-            background: #fff;
-            color: #000;
-            border: 2px solid #000;
-            border-radius: 5px;
-            padding: 5px 10px;
-            font-weight: bold;
-            cursor: pointer;
+        .game-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 900px;
+            position: relative;
         }
 
-        .game-container {
+        .cards-wrapper {
             display: flex;
             justify-content: center;
             gap: 20px;
@@ -90,83 +82,93 @@
         }
 
             .card.matched {
-                background: #4caf50;
+                background-color: #4caf50;
                 color: white;
                 border-color: #388e3c;
             }
 
             .card.incorrect {
-                background: #f44336;
+                background-color: #f44336;
                 color: white;
                 border-color: #d32f2f;
             }
 
             .card.hidden {
-                background: #e0e0e0;
+                background-color: #e0e0e0;
             }
 
             .card.final {
-                background: white;
+                background-color: white;
                 color: black;
                 border-color: black;
             }
 
-        .reset-btn {
+        .reset-btn, .back-btn {
             margin-top: 20px;
             padding: 10px 20px;
             background: white;
             color: black;
-            border: none;
+            border: 1px solid #ccc;
             border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
             font-weight: bold;
         }
-        /* Banner styling - centered under resetBtn */
-        .game-banner {
-            background: gray;
-            color: #000000;
-            text-align: center;
-            padding: 10px;
-            border-radius: 6px;
-            margin-top: 12px;
-            width: 90%;
-            max-width: 420px;
-            box-sizing: border-box;
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
+
+            .reset-btn:hover, .back-btn:hover {
+                background: #e0e0e0;
+            }
+
+        .back-btn {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: white;
+            color: black;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
         }
 
+        h2 {
+            margin: 100px 0 20px 0;
+            text-align: center;
+        }
+
+        #promo-container {
+            margin-top: 15px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
 
-    <!-- Menü Ekranı -->
-    <div id="menu" class="screen active menu">
-        <h2>İslam Tarihi Bilgi Kavram Etkinlikleri</h2>
-        <button onclick="startGame('muahat')">Muâhat Kardeşleri</button>
-        <!-- ileride başka oyunlar eklenebilir -->
-        <!-- <button onclick="startGame('seriyye')">İlk Dört Seriyye</button> -->
+    <!-- Menü -->
+    <div id="menu">
+        <h2>İslam Tarihi Ezber Etkinlikleri</h2>
+        <div class="menu-container">
+            <button class="menu-btn" onclick="startGame('muahat')">Muâhat Kardeşleri</button>
+            <button class="menu-btn" onclick="startGame('seriyye')">Bedir Öncesi 4 Seriyye ve Komutanları</button>
+        </div>
     </div>
 
-    <!-- Oyun Ekranı -->
-    <div id="game" class="screen">
-        <button class="back-btn" onclick="goMenu()">← Menüye Dön</button>
+    <!-- Oyun Alanı -->
+    <div id="game" class="game-container">
+        <button class="back-btn" onclick="goBack()">← Menüye Dön</button>
         <h2 id="game-title"></h2>
-        <div class="game-container">
+        <div class="cards-wrapper">
             <div class="cards" id="left-cards"></div>
             <div class="cards" id="right-cards"></div>
         </div>
-        <button class="reset-btn" id="reset-btn" style="display: none;">Tekrar Oyna</button>
+        <button class="reset-btn" id="reset-btn" style="display:none;">Tekrar Oyna</button>
+        <div id="promo-container"></div>
     </div>
 
-    <script>// Tüm oyunlar burada tanımlanacak
-        const games = {
+    <script>const games = {
             muahat: {
-                title: "Muâhat Kardeşleri Eşleştirme Oyunu",
-                left: ['Hz. Ebubekir', 'Hz. Ömer', 'Hz. Osman', 'Ubeyde b. Cerrah', "Mus'ab b. Umeyr"],
-                right: ['Harice b. Zeyd', 'Utban b. Malik', 'Evs b. Sabit', "Sa'd b. Mu'az", 'Eyyub el-Ensarî'],
+                title: "Muâhat Kardeşleri",
                 matches: {
                     'Hz. Ebubekir': 'Harice b. Zeyd',
                     'Hz. Ömer': 'Utban b. Malik',
@@ -175,33 +177,46 @@
                     "Mus'ab b. Umeyr": 'Eyyub el-Ensarî'
                 }
             },
-            // ileride başka oyunlar buraya eklenecek
+            seriyye: {
+                title: "Bedir Öncesi 4 Seriyye ve Komutanları",
+                matches: {
+                    'Siffül-bahr': 'Hz. Hamza',
+                    'Rabiğ': 'Ubeyde b. Haris',
+                    'Harrar': "Sa'd b. Ebu Vakkas",
+                    'Batn-ı Nahle': 'Abdullah b. Cahş'
+                }
+            }
         };
+
+        // Rastgele mesaj havuzu
+        const promoMessages = [
+            `Destek ve Önerileriniz için: <a href="https://t.me/dhbt_dkab_ihl" target="_blank">@Kanalımızı Takip Edin.</a>`
+        ];
 
         let currentGame = null;
         let selectedCards = [];
         let matchedCount = 0;
         let isProcessing = false;
-        let banner = null;
 
-        const menuScreen = document.getElementById('menu');
-        const gameScreen = document.getElementById('game');
-        const gameTitle = document.getElementById('game-title');
+        const menu = document.getElementById('menu');
+        const game = document.getElementById('game');
         const leftContainer = document.getElementById('left-cards');
         const rightContainer = document.getElementById('right-cards');
         const resetBtn = document.getElementById('reset-btn');
+        const gameTitle = document.getElementById('game-title');
+        const promoContainer = document.getElementById('promo-container');
 
-        function goMenu() {
-            gameScreen.classList.remove('active');
-            menuScreen.classList.add('active');
-        }
-
-        function startGame(gameKey) {
-            currentGame = games[gameKey];
-            menuScreen.classList.remove('active');
-            gameScreen.classList.add('active');
+        function startGame(key) {
+            currentGame = games[key];
+            menu.style.display = 'none';
+            game.style.display = 'flex';
             gameTitle.textContent = currentGame.title;
             initializeGame();
+        }
+
+        function goBack() {
+            game.style.display = 'none';
+            menu.style.display = 'block';
         }
 
         function shuffle(array) {
@@ -221,16 +236,13 @@
             return card;
         }
 
-
         function initializeGame() {
             leftContainer.innerHTML = '';
             rightContainer.innerHTML = '';
+            promoContainer.innerHTML = ''; // mesajları temizle
 
-
-            if (banner) { banner.remove(); banner = null; }
-
-            const leftCards = currentGame.left.map(name => createCard(name, 'left'));
-            const rightCards = currentGame.right.map(name => createCard(name, 'right'));
+            const leftCards = Object.keys(currentGame.matches).map(name => createCard(name, 'left'));
+            const rightCards = Object.values(currentGame.matches).map(name => createCard(name, 'right'));
 
             shuffle(leftCards);
             shuffle(rightCards);
@@ -263,7 +275,8 @@
                         rightCard.classList.add('matched');
                         matchedCount++;
                         selectedCards = [];
-                        if (matchedCount === currentGame.left.length) {
+
+                        if (matchedCount === Object.keys(currentGame.matches).length) {
                             setTimeout(() => showFinalLayout(), 500);
                         }
                     } else {
@@ -283,43 +296,30 @@
             }
         }
 
-        function showBanner() {
-            // mevcut banner varsa kaldır
-            if (banner) {
-                try { banner.remove(); } catch (e) { /* ignore */ }
-                banner = null;
-            }
-
-            // yeni banner oluştur ve sınıf ver
-            banner = document.createElement('div');
-            banner.className = 'game-banner';
-            banner.innerHTML = 'Kanalımıza katılın: <a href="https://t.me/dhbt_dkab_ihl" target="_blank" style="color:#00000;font-weight:700;text-decoration:none;">@dhbt_dkab_ihl</a>';
-
-            // resetBtn'in hemen altına ekle (ortalanmış)
-
-            resetBtn.insertAdjacentElement('afterend', banner);
-        }
-
         function showFinalLayout() {
             leftContainer.innerHTML = '';
             rightContainer.innerHTML = '';
 
-            for (let i = 0; i < currentGame.left.length; i++) {
-                const leftCard = createCard(currentGame.left[i], 'left');
-                const rightCard = createCard(currentGame.right[i], 'right');
+            const entries = Object.entries(currentGame.matches);
+            entries.forEach(([left, right]) => {
+                const leftCard = createCard(left, 'left');
+                const rightCard = createCard(right, 'right');
                 leftCard.classList.remove('hidden');
                 rightCard.classList.remove('hidden');
                 leftCard.classList.add('final');
                 rightCard.classList.add('final');
                 leftContainer.appendChild(leftCard);
                 rightContainer.appendChild(rightCard);
-            }
-            resetBtn.style.display = 'block';
-            showBanner();
+            });
 
+            resetBtn.style.display = 'block';
+
+            // Rastgele mesaj
+            promoContainer.innerHTML = '';
+            const randomMessage = promoMessages[Math.floor(Math.random() * promoMessages.length)];
+            promoContainer.innerHTML = `<p>${randomMessage}</p>`;
         }
 
         resetBtn.addEventListener('click', initializeGame);</script>
-
 </body>
 </html>
